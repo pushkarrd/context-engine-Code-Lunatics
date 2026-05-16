@@ -206,7 +206,24 @@ class IncidentMemory:
                 "metadata": metadata,
             })
 
-        scored.sort(key=lambda m: m.get("similarity", 0.0), reverse=True)
+        query_family = fingerprint.get("family_hint", "")
+        if query_family:
+            same_family: list[dict[str, Any]] = []
+            other_family: list[dict[str, Any]] = []
+            for match in scored:
+                meta_family = (match.get("metadata") or {}).get("family_hint", "")
+                incident_family = str(match.get("incident_id", "")).rsplit("-", 1)[-1]
+                if meta_family == query_family or incident_family == query_family:
+                    same_family.append(match)
+                else:
+                    other_family.append(match)
+
+            same_family.sort(key=lambda m: m.get("similarity", 0.0), reverse=True)
+            other_family.sort(key=lambda m: m.get("similarity", 0.0), reverse=True)
+            scored = same_family + other_family
+        else:
+            scored.sort(key=lambda m: m.get("similarity", 0.0), reverse=True)
+
         return scored[: max(n, 0)]
 
     def get_successful_remediations(
