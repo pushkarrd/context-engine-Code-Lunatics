@@ -223,6 +223,10 @@ class ContextBuilder:
         service = self.alias_registry.resolve(raw_service) if raw_service else raw_service
         trigger = signal.get("trigger", "")
         ts = signal.get("ts", "")
+        # Pull simple evidence from related events
+        deploy_event = next((e for e in related_events if e.get("kind") == "deploy"), None)
+        latency_event = next((e for e in related_events if e.get("kind") == "metric" and "latency" in str(e.get("name", "")).lower()), None)
+        error_event = next((e for e in related_events if e.get("kind") == "log" and str(e.get("level", "")).lower() == "error"), None)
 
         root = "unknown"
         if causal_chain:
@@ -231,22 +235,37 @@ class ContextBuilder:
         match_text = "No similar incidents found."
         if similar_incidents:
             top = similar_incidents[0]
-            match_text = (
-                f"Matches {top.get('incident_id', 'unknown')} pattern "
-                f"(similarity: {top.get('similarity', 0):.2f})."
-            )
+            match_id = top.get("past_incident_id") or top.get("incident_id", "unknown")
+            match_text = f"This looks similar to {match_id}."
 
         remediation_text = "No remediation suggested."
         if remediations:
             top_rem = remediations[0]
-            remediation_text = f"Suggested action: {top_rem.get('action', 'unknown')} to {top_rem.get('target', 'unknown')}"
+            remediation_text = (
+                f"Suggested action: {top_rem.get('action', 'unknown')} "
+                f"{top_rem.get('target', '')}."
+            )
 
-        return (
-            f"{service} {trigger} at {ts}. "
-            f"Root cause: {root}. "
-            f"{match_text} "
-            f"{remediation_text}."
-        )
+        parts = []
+        parts.append(f"Incident in {service} triggered by {trigger} at {ts}.")
+        if deploy_event:
+            parts.append(
+                f"A deploy on {deploy_event.get('service', service)} at {deploy_event.get('ts', '')} is a likely cause."
+            )
+        elif root != "unknown":
+            parts.append(f"Likely root cause: {root}.")
+
+        if latency_event:
+            parts.append(
+                f"Latency spiked (p99 {latency_event.get('value', '')}) just before the alert."
+            )
+        if error_event:
+            parts.append("Error logs appeared around the same time.")
+
+        parts.append(match_text)
+        parts.append(remediation_text)
+
+        return " ".join(p for p in parts if p)
 
     def _compute_confidence(
         self,
