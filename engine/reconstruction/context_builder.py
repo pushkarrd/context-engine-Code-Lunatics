@@ -178,12 +178,14 @@ class ContextBuilder:
                 related_events,
             )
 
-            if mode == "deep" and self.gemini_client:
+            if self.gemini_client:
                 elapsed = time.monotonic() - start
-                if elapsed < budget_s - 1.0:
+                if elapsed < budget_s - 0.5:
                     try:
+                        signal_with_mode = dict(signal)
+                        signal_with_mode["mode"] = mode
                         context["explain"] = self.gemini_client.generate_explanation(
-                            signal=signal,
+                            signal=signal_with_mode,
                             related_events=related_events,
                             causal_chain=causal_chain,
                             similar_incidents=similar_incidents,

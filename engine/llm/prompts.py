@@ -1,7 +1,7 @@
 """Prompt templates for Gemini reasoning."""
 
 EXPLAIN_PROMPT = """
-You are an expert Site Reliability Engineer analyzing a production incident.
+You are an expert Site Reliability Engineer writing a plain-English summary.
 
 Incident Signal: {signal}
 
@@ -17,13 +17,13 @@ Similar Past Incidents:
 Suggested Remediations:
 {remediations}
 
-Write a concise incident summary (3-5 sentences) that:
-1. States what triggered the incident
-2. Explains the root cause with evidence
-3. References the most similar past incident
-4. Recommends the specific remediation action
+Write 2-4 short, easy-to-read sentences in simple English. Make it human-friendly:
+1) Say what triggered the incident.
+2) Explain the likely root cause with one clear piece of evidence.
+3) Mention the most similar past incident.
+4) End with the recommended action.
 
-Be specific. Use service names, versions, metrics. No generic advice.
+Be specific (service names, versions, metrics). Avoid jargon and long clauses.
 """
 
 CAUSAL_CHAIN_PROMPT = """
