@@ -29,3 +29,5 @@ report.json
 !.env.example
 *.pem
 *.key
+data/events.db
+*.db
