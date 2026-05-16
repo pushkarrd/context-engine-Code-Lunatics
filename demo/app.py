@@ -209,75 +209,41 @@ with tabs[1]:
     if not context:
         st.info("Run a reconstruction to see context details.")
     else:
-        st.subheader("Reconstructed Context")
+        st.subheader("Reconstructed Context (JSON)")
 
-        st.markdown("**1. Related Events**")
-        related = context.get("related_events", [])
-        if related:
-            related_rows = []
-            for event in related:
-                related_rows.append({
-                    "ts": event.get("ts"),
-                    "kind": event.get("kind"),
-                    "service": event.get("service"),
-                    "details": event.get("msg") or event.get("name") or event.get("change"),
-                    "_provenance": event.get("_provenance", "event_store"),
-                })
-            st.dataframe(related_rows, use_container_width=True)
-        else:
-            st.caption("No related events found.")
-
-        st.markdown("**2. Causal Chain**")
-        chain = context.get("causal_chain", [])
-        if chain:
-            chain_rows = []
-            for edge in chain:
-                chain_rows.append({
+        payload = {
+            "related_events": context.get("related_events", []),
+            "causal_chain": [
+                {
                     "cause_id": edge.get("cause_id") or edge.get("cause_event_id"),
                     "effect_id": edge.get("effect_id") or edge.get("effect_event_id"),
                     "evidence": edge.get("evidence"),
                     "confidence": edge.get("confidence", 0.0),
-                })
-            st.dataframe(chain_rows, use_container_width=True)
-        else:
-            st.caption("No causal edges identified.")
-
-        st.markdown("**3. Similar Past Incidents**")
-        similar = context.get("similar_past_incidents", [])
-        if similar:
-            similar_rows = []
-            for match in similar:
-                similar_rows.append({
+                }
+                for edge in (context.get("causal_chain", []) or [])
+            ],
+            "similar_past_incidents": [
+                {
                     "past_incident_id": match.get("incident_id"),
                     "similarity": match.get("similarity"),
                     "rationale": match.get("rationale"),
-                })
-            st.dataframe(similar_rows, use_container_width=True)
-        else:
-            st.caption("No similar incidents found.")
-
-        st.markdown("**4. Suggested Remediations**")
-        remediations = context.get("suggested_remediations", [])
-        if remediations:
-            rem_rows = []
-            for rec in remediations:
-                rem_rows.append({
+                }
+                for match in (context.get("similar_past_incidents", []) or [])
+            ],
+            "suggested_remediations": [
+                {
                     "action": rec.get("action"),
                     "target": rec.get("target"),
                     "historical_outcome": rec.get("historical_outcome") or rec.get("outcome"),
                     "confidence": rec.get("confidence"),
-                })
-            st.dataframe(rem_rows, use_container_width=True)
-        else:
-            st.caption("No remediation suggestions available.")
+                }
+                for rec in (context.get("suggested_remediations", []) or [])
+            ],
+            "confidence": context.get("confidence", 0.0),
+            "explain": context.get("explain", ""),
+        }
 
-        st.markdown("**5. Overall Confidence**")
-        confidence = float(context.get("confidence", 0.0) or 0.0)
-        st.metric("Confidence", f"{confidence:.2f}")
-        st.progress(min(max(confidence, 0.0), 1.0))
-
-        st.markdown("**6. Human Readable Explanation**")
-        st.info(context.get("explain", "No explanation."))
+        st.json(payload)
 
 
 with tabs[2]:
