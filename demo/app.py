@@ -15,6 +15,7 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 from adapters.myteam import Engine
+from harness import WEIGHTS
 
 
 st.set_page_config(page_title="Persistent Context Engine", layout="wide")
@@ -82,6 +83,53 @@ def _format_context_json(context: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _load_report() -> dict[str, Any] | None:
+    report_path = os.path.join(_ROOT, "report.json")
+    if not os.path.exists(report_path):
+        return None
+
+    try:
+        with open(report_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        return payload if isinstance(payload, dict) else None
+    except Exception:
+        return None
+
+
+def _format_score_rows(score: dict[str, Any]) -> list[dict[str, Any]]:
+    axes = score.get("axes", {}) if isinstance(score, dict) else {}
+    rows: list[dict[str, Any]] = []
+
+    for axis, value in axes.items():
+        weight = WEIGHTS.get(axis, 0.0)
+        if value is None:
+            rows.append({
+                "axis": axis,
+                "value": "(panel)",
+                "weight": weight,
+                "contribution": "manual",
+            })
+            continue
+
+        if isinstance(value, (int, float)):
+            contribution = round(weight * float(value), 4)
+            rows.append({
+                "axis": axis,
+                "value": round(float(value), 4),
+                "weight": weight,
+                "contribution": contribution,
+            })
+        else:
+            rows.append({
+                "axis": axis,
+                "value": value,
+                "weight": weight,
+                "contribution": "n/a",
+            })
+
+    return rows
+
+
 if "engine" not in st.session_state:
     st.session_state.engine = Engine()
 
@@ -131,6 +179,7 @@ tabs = st.tabs([
     "🚨 Trigger Incident",
     "🧠 Reconstructed Context",
     "🕸️ Memory Graph",
+    "📊 Score Matrix",
     "📋 Raw Events",
 ])
 
@@ -234,6 +283,40 @@ with tabs[2]:
 
 
 with tabs[3]:
+    st.subheader("Self-Check Score Matrix")
+    report = _load_report()
+
+    if not report or not report.get("score"):
+        st.info("No benchmark report found yet. Run `python self_check.py --adapter adapters.myteam:Engine` to generate `report.json`.")
+    else:
+        aggregated = report.get("aggregated", {})
+        score = report.get("score", {})
+
+        st.caption("Automated metrics from the latest benchmark run.")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Weighted automated", f"{score.get('weighted_score', 0.0):.3f}")
+        col2.metric("Max automated", f"{score.get('max_automated', 0.0):.2f}")
+        col3.metric("Signals", f"{aggregated.get('n_signals_total', 0)}")
+
+        st.dataframe(_format_score_rows(score), use_container_width=True, hide_index=True)
+
+        st.markdown("**Aggregated metrics**")
+        metric_rows = [
+            {"metric": "recall@5", "value": aggregated.get("recall@5")},
+            {"metric": "precision@5_mean", "value": aggregated.get("precision@5_mean")},
+            {"metric": "remediation_acc", "value": aggregated.get("remediation_acc")},
+            {"metric": "latency_p95_ms", "value": aggregated.get("latency_p95_ms")},
+            {"metric": "latency_mean_ms", "value": aggregated.get("latency_mean_ms")},
+        ]
+        st.dataframe(metric_rows, use_container_width=True, hide_index=True)
+
+        st.code(
+            f"WEIGHTED AUTOMATED = {score.get('weighted_score', 0.0):.3f} / {score.get('max_automated', 0.0):.2f}\n"
+            f"NOTE = {score.get('note', '')}",
+            language="text",
+        )
+
+with tabs[4]:
     st.subheader("Raw Events")
     events = st.session_state.events
     if not events:
