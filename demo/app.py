@@ -245,6 +245,14 @@ with tabs[1]:
 
         st.json(payload)
 
+        payload_text = json.dumps(payload, indent=2)
+        st.download_button(
+            label="Download JSON",
+            data=payload_text,
+            file_name="reconstructed-context.json",
+            mime="application/json",
+        )
+
 
 with tabs[2]:
     st.subheader("Memory Graph")
