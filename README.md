@@ -11,12 +11,18 @@
 [![NetworkX](https://img.shields.io/badge/NetworkX-008080?style=for-the-badge&logo=graphql&logoColor=white)](https://networkx.org/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Railway](https://img.shields.io/badge/Deployed_on_Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://context-engine-code-lunatics-production.up.railway.app/)
+[![Live Demo](https://img.shields.io/badge/🟢_Live-context--engine-brightgreen?style=for-the-badge)](https://context-engine-code-lunatics-production.up.railway.app/)
 
 ---
 
 **Anvil Hackathon — Problem 02/04 · Open Track**
 
 > *"Incidents don't happen in isolation — they echo. The Persistent Context Engine makes sure your infra never forgets."*
+
+| 🌐 Live App | 🎥 Demo Video | 📄 Problem Statement |
+|:-----------:|:-------------:|:--------------------:|
+| [**Open Deployed App ↗**](https://context-engine-code-lunatics-production.up.railway.app/) | [**Watch Demo Video ↗**](https://drive.google.com/file/d/1j2_MdsQ70vj6eN5-1xolbKCWgLLSdzX2/view?usp=sharing) | [**Read Problem PDF ↗**](https://drive.google.com/file/d/1qbH1IhaJLFGAXX505xwmFDKeSGzLrF4M/view?usp=sharing) |
 
 [🚀 Quickstart](#-quickstart-5-steps) · [🏗️ Architecture](#️-architecture) · [📊 Scoring](#-scoring-metrics) · [🔄 Data Flow](#-data-flow) · [📁 Project Structure](#-project-structure) · [🎥 Demo](#-demo)
 
@@ -403,20 +409,34 @@ pytest tests/ -v --tb=short
 
 ## 🎥 Demo
 
-To launch the Streamlit demo UI:
+### 🌐 Live Deployed App
 
-```bash
-streamlit run demo/app.py
-```
+> **The engine is live and running on Railway:**
+> ### 👉 [context-engine-code-lunatics-production.up.railway.app](https://context-engine-code-lunatics-production.up.railway.app/)
 
-The demo shows:
+---
+
+### 📹 Demo Video
+
+> **Watch the full 5-minute walkthrough:**
+> ### 👉 [Watch on Google Drive](https://drive.google.com/file/d/1j2_MdsQ70vj6eN5-1xolbKCWgLLSdzX2/view?usp=sharing)
+
+The demo covers:
 - 📨 Live event ingestion from the sample JSONL
 - 🕸️ Memory graph building in real-time
 - 🔀 Alias registry updating on rename event
 - 🔍 `reconstruct_context()` running on INC-714
 - 📋 Full output: causal chain + similar incidents + remediations
 
-> The demo UI is for the 5-minute submission video only and is not judged.
+---
+
+### 🖥️ Run Locally (Streamlit UI)
+
+```bash
+streamlit run demo/app.py
+```
+
+> The local Streamlit UI is for development/demo purposes only and is not judged.
 
 ---
 
@@ -464,7 +484,8 @@ Step 14 →  Dockerfile + README         Submission packaging
 - [x] `Dockerfile` — reproducible environment
 - [x] `README.md` — quickstart in 5 steps
 - [x] `requirements.txt` — all deps with version pins
-- [ ] 5-min demo video (screen recording)
+- [x] 5-min demo video — [Watch on Google Drive](https://drive.google.com/file/d/1j2_MdsQ70vj6eN5-1xolbKCWgLLSdzX2/view?usp=sharing)
+- [x] Deployed live — [context-engine-code-lunatics-production.up.railway.app](https://context-engine-code-lunatics-production.up.railway.app/)
 - [ ] 3-page PDF writeup
 
 ---
@@ -478,6 +499,19 @@ Step 14 →  Dockerfile + README         Submission packaging
 | Rename chain `A→B→C` breaks resolution | Full transitive resolution in alias registry |
 | Graph too large for memory | Prune edges older than 30 days; keep incident nodes forever |
 | Wildly different benchmark seeds | All logic is pattern-based, zero hardcoding |
+
+---
+
+## 📎 Resources & Links
+
+| Resource | Link |
+|----------|------|
+| 🌐 **Live Deployed App** | [context-engine-code-lunatics-production.up.railway.app](https://context-engine-code-lunatics-production.up.railway.app/) |
+| 🎥 **Demo Video** | [Watch on Google Drive](https://drive.google.com/file/d/1j2_MdsQ70vj6eN5-1xolbKCWgLLSdzX2/view?usp=sharing) |
+| 📄 **Problem Statement PDF** | [View on Google Drive](https://drive.google.com/file/d/1qbH1IhaJLFGAXX505xwmFDKeSGzLrF4M/view?usp=sharing) |
+| 🤖 **Gemini API** | [aistudio.google.com](https://aistudio.google.com/) |
+| 🗄️ **DuckDB Docs** | [duckdb.org](https://duckdb.org/) |
+| 🔎 **ChromaDB Docs** | [trychroma.com](https://www.trychroma.com/) |
 
 ---
 
