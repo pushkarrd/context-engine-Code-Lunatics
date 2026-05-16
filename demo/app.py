@@ -209,43 +209,75 @@ with tabs[1]:
     if not context:
         st.info("Run a reconstruction to see context details.")
     else:
-        st.subheader("Context JSON")
-        st.json(_format_context_json(context))
+        st.subheader("Reconstructed Context")
 
-        st.subheader("Causal Chain")
+        st.markdown("**1. Related Events**")
+        related = context.get("related_events", [])
+        if related:
+            related_rows = []
+            for event in related:
+                related_rows.append({
+                    "ts": event.get("ts"),
+                    "kind": event.get("kind"),
+                    "service": event.get("service"),
+                    "details": event.get("msg") or event.get("name") or event.get("change"),
+                    "_provenance": event.get("_provenance", "event_store"),
+                })
+            st.dataframe(related_rows, use_container_width=True)
+        else:
+            st.caption("No related events found.")
+
+        st.markdown("**2. Causal Chain**")
         chain = context.get("causal_chain", [])
         if chain:
+            chain_rows = []
             for edge in chain:
-                cause = edge.get("cause_id") or edge.get("cause_event_id")
-                effect = edge.get("effect_id") or edge.get("effect_event_id")
-                confidence = edge.get("confidence", 0.0)
-                st.write(f"{cause} → {effect} ({confidence:.0%})")
+                chain_rows.append({
+                    "cause_id": edge.get("cause_id") or edge.get("cause_event_id"),
+                    "effect_id": edge.get("effect_id") or edge.get("effect_event_id"),
+                    "evidence": edge.get("evidence"),
+                    "confidence": edge.get("confidence", 0.0),
+                })
+            st.dataframe(chain_rows, use_container_width=True)
         else:
             st.caption("No causal edges identified.")
 
-        st.subheader("Similar Past Incidents")
+        st.markdown("**3. Similar Past Incidents**")
         similar = context.get("similar_past_incidents", [])
         if similar:
-            st.dataframe(similar, use_container_width=True)
+            similar_rows = []
+            for match in similar:
+                similar_rows.append({
+                    "past_incident_id": match.get("incident_id"),
+                    "similarity": match.get("similarity"),
+                    "rationale": match.get("rationale"),
+                })
+            st.dataframe(similar_rows, use_container_width=True)
         else:
             st.caption("No similar incidents found.")
 
-        st.subheader("Suggested Remediations")
+        st.markdown("**4. Suggested Remediations**")
         remediations = context.get("suggested_remediations", [])
         if remediations:
-            top = remediations[0]
-            st.success(
-                f"Top recommendation: {top.get('action', 'unknown')} → {top.get('target', 'unknown')}"
-            )
-            st.dataframe(remediations, use_container_width=True)
+            rem_rows = []
+            for rec in remediations:
+                rem_rows.append({
+                    "action": rec.get("action"),
+                    "target": rec.get("target"),
+                    "historical_outcome": rec.get("historical_outcome") or rec.get("outcome"),
+                    "confidence": rec.get("confidence"),
+                })
+            st.dataframe(rem_rows, use_container_width=True)
         else:
             st.caption("No remediation suggestions available.")
 
-        st.subheader("Explanation")
-        st.info(context.get("explain", "No explanation."))
+        st.markdown("**5. Overall Confidence**")
+        confidence = float(context.get("confidence", 0.0) or 0.0)
+        st.metric("Confidence", f"{confidence:.2f}")
+        st.progress(min(max(confidence, 0.0), 1.0))
 
-        confidence = context.get("confidence", 0.0)
-        st.progress(min(max(float(confidence), 0.0), 1.0))
+        st.markdown("**6. Human Readable Explanation**")
+        st.info(context.get("explain", "No explanation."))
 
 
 with tabs[2]:
