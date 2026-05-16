@@ -512,6 +512,9 @@ Step 14 →  Dockerfile + README         Submission packaging
 | 🤖 **Gemini API** | [aistudio.google.com](https://aistudio.google.com/) |
 | 🗄️ **DuckDB Docs** | [duckdb.org](https://duckdb.org/) |
 | 🔎 **ChromaDB Docs** | [trychroma.com](https://www.trychroma.com/) |
+🔎 **Benchmark Output Score matrix ** | [View Output on drive](https://drive.google.com/file/d/1gaxiuBj6HxF785vI49THFcaEPfuYJyMQ/view?usp=sharing)
+**Benchmark Output Reconstructed matrix ** | [View Output on drive](https://drive.google.com/file/d/1oDVY6I7sg_CtBLSqS9g23tFesfcObyGV/view?usp=sharing)
+
 
 ---
 
