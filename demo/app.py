@@ -324,28 +324,23 @@ with tabs[3]:
         aggregated = report.get("aggregated", {})
         score = report.get("score", {})
 
-        st.caption("Automated metrics from the latest benchmark run.")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Weighted automated", f"{score.get('weighted_score', 0.0):.3f}")
-        col2.metric("Max automated", f"{score.get('max_automated', 0.0):.2f}")
-        col3.metric("Signals", f"{aggregated.get('n_signals_total', 0)}")
+        score_payload = {
+            "recall@5": aggregated.get("recall@5"),
+            "precision@5_mean": aggregated.get("precision@5_mean"),
+            "remediation_acc": aggregated.get("remediation_acc"),
+            "latency_p95_ms": aggregated.get("latency_p95_ms"),
+            "weighted_automated": score.get("weighted_score", 0.0),
+        }
 
-        st.dataframe(_format_score_rows(score), use_container_width=True, hide_index=True)
+        st.caption("Latest automated score (JSON)")
+        st.json(score_payload)
 
-        st.markdown("**Aggregated metrics**")
-        metric_rows = [
-            {"metric": "recall@5", "value": aggregated.get("recall@5")},
-            {"metric": "precision@5_mean", "value": aggregated.get("precision@5_mean")},
-            {"metric": "remediation_acc", "value": aggregated.get("remediation_acc")},
-            {"metric": "latency_p95_ms", "value": aggregated.get("latency_p95_ms")},
-            {"metric": "latency_mean_ms", "value": aggregated.get("latency_mean_ms")},
-        ]
-        st.dataframe(metric_rows, use_container_width=True, hide_index=True)
-
-        st.code(
-            f"WEIGHTED AUTOMATED = {score.get('weighted_score', 0.0):.3f} / {score.get('max_automated', 0.0):.2f}\n"
-            f"NOTE = {score.get('note', '')}",
-            language="text",
+        json_text = json.dumps(score_payload, indent=2)
+        st.download_button(
+            label="Download JSON",
+            data=json_text,
+            file_name="score-matrix.json",
+            mime="application/json",
         )
 
 with tabs[4]:
