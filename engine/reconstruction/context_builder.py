@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -195,8 +196,9 @@ class ContextBuilder:
                     except Exception as exc:
                         logger.exception("Gemini explanation failed: %s", exc)
 
-            if not context["explain"]:
-                context["explain"] = self._build_fast_explanation(
+            force_plain = str(os.environ.get("FORCE_PLAIN_EXPLAIN", "")).lower() in {"1", "true", "yes"}
+            if force_plain or not context["explain"]:
+                context["explain"] = self._build_plain_explanation(
                     signal,
                     related_events,
                     causal_chain,
@@ -210,7 +212,7 @@ class ContextBuilder:
         logger.debug("context_builder.done mode=%s elapsed_ms=%.2f", mode, elapsed_ms)
         return context
 
-    def _build_fast_explanation(
+    def _build_plain_explanation(
         self,
         signal: dict[str, Any],
         related_events: list[dict[str, Any]],
